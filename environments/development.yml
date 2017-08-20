@@ -1,0 +1,14 @@
+
+# Service specific configuration
+
+# Directory to create temporary files
+TMPDIR: '/tmp/api.pln.pt'
+
+# FreeLing4 analyze bin file
+FL4BIN: '/opt/freeling-4.0/bin/analyze'
+
+# FreeLing4 full path to config files per lang
+FL4CFG:
+  PT: '/opt/freeling-4.0/share/freeling/config/pt.cfg'
+  GL: '/opt/freeling-4.0/share/freeling/config/gl.cfg'
+
