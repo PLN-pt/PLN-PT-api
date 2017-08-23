@@ -342,29 +342,10 @@ sub _handle_opts {
       term      => 'form',
     };
 
-  if (param 'lang') {
-    $options->{lang} = lc(param 'lang');
-  }
-  if (param 'output') {
-    $options->{output} = lc(param 'output');
-  }
-  if (param 'use') {
-    $options->{use} = lc(param 'use');
-  }
-  if (param 'ner') {
-    $options->{ner} = lc(param 'ner');
-  }
-  if (param 'rtk') {
-    $options->{rtk} = lc(param 'rtk');
-  }
-  if (param 'sentence') {
-    $options->{sentence} = lc(param 'sentence');
-  }
-  if (param 'stopwords') {
-    $options->{stopwords} = lc(param 'stopwords');
-  }
-  if (param 'term') {
-    $options->{term} = lc(param 'term');
+  for my $p (qw.lang output use ner rtk sentence stopwords term.) {
+    if (param $p) {
+      $options->{$p} = lc(param $p);
+    }
   }
 
   return $options;
