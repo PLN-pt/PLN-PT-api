@@ -29,7 +29,7 @@ get '/morph/*' => sub {
   my $o = File::Temp->new( DIR => $TMPDIR );
   my ($input, $output) = ($i->filename, $o->filename);
 
-  path($input)->spew_raw($word);
+  path($input)->spew_utf8($word);
   my ($raw, $json) = _morph($input, $output, $options);
 
   my $ct = 'application/json';
