@@ -20,6 +20,30 @@ get '/' => sub {
   return 'PLN::PT::api -- http://pln.pt';
 };
 
+# get /morph
+get '/morph/*' => sub {
+  my ($word) = splat;
+  my $options = _handle_opts();
+
+  my $i = File::Temp->new( DIR => $TMPDIR );
+  my $o = File::Temp->new( DIR => $TMPDIR );
+  my ($input, $output) = ($i->filename, $o->filename);
+
+  path($input)->spew_raw($word);
+  my ($raw, $json) = _morph($input, $output, $options);
+
+  my $ct = 'application/json';
+  $ct = 'plain/text' if ($options->{output} eq 'raw');
+
+  content_type "$ct; charset='utf8'";
+  if ($options->{output} eq 'raw') {
+    return $raw;
+  }
+  else {
+    return $json;
+  }
+};
+
 # POST /tokenizer
 post '/tokenizer' => sub {
   my $text = request->body;
@@ -269,6 +293,31 @@ sub _tagger {
 
   return ($raw, $json);
 }
+
+sub _morph {
+  my ($input, $output, $options) = @_;
+  my ($raw, $json);
+
+  my $command = _fl4_command($options->{lang});
+  my $r = `$command --outlv morfo < $input > $output`;
+
+  # raw output
+  $raw = path($output)->slurp_raw;
+  $raw =~ s/^\s*\n//mg;
+
+  # json output
+  my ($word,@data) = split /\s/, $raw;
+  my @analysis = ();
+  while (@data) {
+    push @analysis, { lemma => $data[0], analysis => $data[1], prob => $data[2] };
+    @data = @data[3..$#data];
+  }
+  $json = _my_encode([ $word, @analysis]);
+
+  return ($raw, $json);
+}
+
+
 
 sub _fl4_command {
   my $lang = shift;
