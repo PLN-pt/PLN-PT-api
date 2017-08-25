@@ -1,13 +1,13 @@
 package PLN::PT::api;
 use Dancer2;
-use JSON::MaybeXS;
 use File::Temp;
 use Path::Tiny;
 use Lingua::Jspell;
 use Lingua::PT::Actants;
-use Encode qw/encode/;
 use Lingua::PT::PLNbase;
 use Lingua::StopWords qw/getStopWords/;
+
+use PLN::PT::api::utils;
 
 our $VERSION = '0.1';
 
@@ -23,7 +23,7 @@ get '/' => sub {
 # get /morph
 get '/morph/*' => sub {
   my ($word) = splat;
-  my $options = _handle_opts();
+  my $options = PLN::PT::api::utils::handle_opts();
 
   my $i = File::Temp->new( DIR => $TMPDIR );
   my $o = File::Temp->new( DIR => $TMPDIR );
@@ -47,7 +47,7 @@ get '/morph/*' => sub {
 # POST /tokenizer
 post '/tokenizer' => sub {
   my $text = request->body;
-  my $options = _handle_opts();
+  my $options = PLN::PT::api::utils::handle_opts();
 
   my $i = File::Temp->new( DIR => $TMPDIR );
   my $o = File::Temp->new( DIR => $TMPDIR );
@@ -71,7 +71,7 @@ post '/tokenizer' => sub {
 # POST /tagger
 post '/tagger' => sub {
   my $text = request->body;
-  my $options = _handle_opts();
+  my $options = PLN::PT::api::utils::handle_opts();
 
   my $i = File::Temp->new( DIR => $TMPDIR );
   my $o = File::Temp->new( DIR => $TMPDIR );
@@ -96,7 +96,7 @@ post '/tagger' => sub {
 # POST /word_analysis
 post '/word_analysis' => sub {
   my $text = request->body;
-  my $options = _handle_opts();;
+  my $options = PLN::PT::api::utils::handle_opts();;
   my $r;
 
   my $dict = Lingua::Jspell->new('pt');
@@ -118,7 +118,7 @@ post '/word_analysis' => sub {
 # POST /dep_parser
 post '/dep_parser' => sub {
   my $text = request->body;
-  my $options = _handle_opts();
+  my $options = PLN::PT::api::utils::handle_opts();
 
   my $json = _get_dep_tree($text);
   my $data = decode_json($json);
@@ -158,7 +158,7 @@ post '/dep_parser' => sub {
 
 post '/actants' => sub {
   my $text = request->body;
-  my $options = _handle_opts();
+  my $options = PLN::PT::api::utils::handle_opts();
   my $r;
 
   my $t = _get_dep_tree($text);
@@ -171,7 +171,7 @@ post '/actants' => sub {
 
   # json
   my $data = { syntagmas => [@syns], cores => [@cores] };
-  my $json = _my_encode($data);
+  my $json = PLN::PT::api::utils::my_encode($data);
 
   if ($options->{output} eq 'raw') {
     content_type "text/plain; charset='utf8'";
@@ -186,7 +186,7 @@ post '/actants' => sub {
 # POST /tf
 post '/tf' => sub {
   my $text = request->body;
-  my $options = _handle_opts();
+  my $options = PLN::PT::api::utils::handle_opts();
 
   my $i = File::Temp->new( DIR => $TMPDIR );
   my $o = File::Temp->new( DIR => $TMPDIR );
@@ -199,7 +199,7 @@ post '/tf' => sub {
   $ct = 'plain/text' if ($options->{output} eq 'raw');
   content_type "$ct; charset='utf8'";
 
-  my $data = _my_decode($json);
+  my $data = PLN::PT::api::utils::my_decode($json);
   my $tf = {};
   my $stopwords = _stopwords('PT');
   foreach (@$data) {
@@ -225,7 +225,7 @@ post '/tf' => sub {
     $tf->{$t}++;
   }
 
-  return _my_encode($tf);
+  return PLN::PT::api::utils::my_encode($tf);
 };
 
 # GET /stopwords
@@ -247,7 +247,7 @@ sub _tokenizer {
     path($output)->spew_raw(join("\n\n", @sentences));
   }
   else {
-    my $command = _fl4_command($options->{lang});
+    my $command = PLN::PT::api::utils::fl4_command($options->{lang});
     $r = `$command --outlv $outlv < $input > $output`;
   }
 
@@ -265,7 +265,7 @@ sub _tokenizer {
     @data = split /\n/, $raw;
   }
   @data = grep {!/^$/} @data;
-  $json = _my_encode([@data]);
+  $json = PLN::PT::api::utils::my_encode([@data]);
 
   return ($raw, $json);
 }
@@ -278,7 +278,7 @@ sub _tagger {
   $opts  = $options->{ner} ?  ' --ner' : ' --noner';
   $opts .= $options->{rtk} ?  ' --rtk' : ' --nortk';
 
-  my $command = _fl4_command($options->{lang});
+  my $command = PLN::PT::api::utils::fl4_command($options->{lang});
   my $r = `$command --outlv tagged $opts < $input > $output`;
 
   # raw output
@@ -289,7 +289,7 @@ sub _tagger {
   my @data = split /\n/, $raw;
   @data = grep {!/^$/} @data;
   @data = map {[split /\s+/]} @data;
-  $json = _my_encode([@data]);
+  $json = PLN::PT::api::utils::my_encode([@data]);
 
   return ($raw, $json);
 }
@@ -298,7 +298,7 @@ sub _morph {
   my ($input, $output, $options) = @_;
   my ($raw, $json);
 
-  my $command = _fl4_command($options->{lang});
+  my $command = PLN::PT::api::utils::fl4_command($options->{lang});
   my $r = `$command --outlv morfo < $input > $output`;
 
   # raw output
@@ -312,43 +312,9 @@ sub _morph {
     push @analysis, { lemma => $data[0], analysis => $data[1], prob => $data[2] };
     @data = @data[3..$#data];
   }
-  $json = _my_encode([ $word, @analysis]);
+  $json = PLN::PT::api::utils::my_encode([ $word, @analysis]);
 
   return ($raw, $json);
-}
-
-
-
-sub _fl4_command {
-  my $lang = shift;
-  $lang = 'pt' unless $lang;
-
-  my $cfg = $FL4CFG->{uc($lang)};
-
-  return "$FL4BIN -f $cfg ";
-}
-
-sub _handle_opts {
-
-  # set defaults
-  my $options = {
-      lang      => 'pt',
-      output    => 'json',
-      use       => 'fl',
-      ner       => 0,
-      rtk       => 0,
-      sentence  => 0,
-      stopwords => 0,
-      term      => 'form',
-    };
-
-  for my $p (qw.lang output use ner rtk sentence stopwords term.) {
-    if (param $p) {
-      $options->{$p} = lc(param $p);
-    }
-  }
-
-  return $options;
 }
 
 sub _get_dep_tree {
@@ -373,18 +339,5 @@ sub _stopwords {
   return [keys %$stopwords];
 }
 
-sub _my_encode {
-  my ($data) = @_;
-
-  my $o = JSON::MaybeXS->new(utf8 => 0);
-  return $o->encode($data);
-}
-
-sub _my_decode {
-  my ($data) = @_;
-
-  my $o = JSON::MaybeXS->new(utf8 => 0);
-  return $o->decode($data);
-}
-
 true;
+
