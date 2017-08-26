@@ -10,6 +10,7 @@ use Lingua::StopWords qw/getStopWords/;
 use PLN::PT::api::utils;
 use PLN::PT::api::tokenizer;
 use PLN::PT::api::tagger;
+use PLN::PT::api::dep_parser;
 
 our $VERSION = '0.1';
 
@@ -52,6 +53,9 @@ post '/tokenizer' => \&PLN::PT::api::tokenizer::route;
 # POST /tagger
 post '/tagger' => \&PLN::PT::api::tagger::route;
 
+# POST /tagger
+post '/dep_paser' => \&PLN::PT::api::dep_paser::route;
+
 # POST /word_analysis
 post '/word_analysis' => sub {
   my $text = request->body;
@@ -71,47 +75,6 @@ post '/word_analysis' => sub {
   if ($options->{output} eq 'json') {
     content_type "application/json; charset='utf8'";
     return encode_json($r);
-  }
-};
-
-# POST /dep_parser
-post '/dep_parser' => sub {
-  my $text = request->body;
-  my $options = PLN::PT::api::utils::handle_opts();
-
-  my $json = _get_dep_tree($text);
-  my $data = decode_json($json);
-
-  # nrc
-  my @final;
-  for my $e (@$data) {
-    my @ls;
-    for (@$e) {
-      push @ls, [$_->{id}, $_->{form}, '_', $_->{upostag}, $_->{xpostag}, $_->{feats}, $_->{head}, $_->{deprel}, '_', '_'];
-
-    }
-    push @final, [@ls];
-  }
-  if (scalar(@final) == 1) {
-    @final = @{$final[0]};
-  }
-
-  # raw
-  my @lines = ();
-  foreach (@{$data->[0]}) {
-    push @lines, join("\t",
-      $_->{id}, $_->{form}, '_', $_->{upostag}, $_->{xpostag},
-      $_->{feats}, $_->{head}, $_->{deprel}, '_', '_' );
-  }
-  my $raw = join("\n", @lines);
-
-  if ($options->{output} eq 'raw') {
-    content_type "text/plain; charset='utf8'";
-    return $raw;
-  }
-  if ($options->{output} eq 'json') {
-    content_type "application/json; charset='utf8'";
-    return encode_json([@final]);
   }
 };
 
@@ -214,20 +177,6 @@ sub _morph {
   $json = PLN::PT::api::utils::my_encode([ $word, @analysis]);
 
   return ($raw, $json);
-}
-
-sub _get_dep_tree {
-  my ($text) = @_;
-  my $r;
-
-  my $i = File::Temp->new( DIR => $TMPDIR, UNLINK => 0 );
-  my $input = $i->filename;
-  path($input)->spew_raw($text);
-
-  # FIXME
-  $r = `curl -H "Content-Type:text/plain" -s --data-binary \@$input http://127.0.0.1:7788`;
-
-  return $r;
 }
 
 sub _stopwords {
