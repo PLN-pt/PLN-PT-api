@@ -12,6 +12,7 @@ use PLN::PT::api::tokenizer;
 use PLN::PT::api::tagger;
 use PLN::PT::api::dep_parser;
 use PLN::PT::api::morph_analyzer;
+use PLN::PT::api::stopwords;
 
 our $VERSION = '0.1';
 
@@ -20,21 +21,15 @@ my $TMPDIR = config->{'TMPDIR'};
 my $FL4BIN = config->{'FL4BIN'};
 my $FL4CFG = config->{'FL4CFG'};
 
-get '/' => sub {
-  return 'PLN::PT::api -- http://pln.pt';
-};
+# home
+get '/' => sub { return 'PLN::PT::api -- http://pln.pt'; };
 
-# POST /tokenizer
-post '/tokenizer' => \&PLN::PT::api::tokenizer::route;
-
-# POST /tagger
-post '/tagger' => \&PLN::PT::api::tagger::route;
-
-# GET /morph_analyzer
-get '/morph_analyzer/*' => \&PLN::PT::api::morph_analyzer::route;
-
-# POST /tagger
-post '/dep_paser' => \&PLN::PT::api::dep_paser::route;
+# routes
+get  '/morph_analyzer/*' => \&PLN::PT::api::morph_analyzer::route;
+get  '/stopwords'        => \&PLN::PT::api::stopwords::route;
+post '/tokenizer'        => \&PLN::PT::api::tokenizer::route;
+post '/tagger'           => \&PLN::PT::api::tagger::route;
+post '/dep_paser'        => \&PLN::PT::api::dep_paser::route;
 
 post '/actants' => sub {
   my $text = request->body;
@@ -107,20 +102,6 @@ post '/tf' => sub {
 
   return PLN::PT::api::utils::my_encode($tf);
 };
-
-# GET /stopwords
-get '/stopwords' => sub {
-  content_type "application/json; charset='utf8'";
-  return to_json(_stopwords('PT'));
-};
-
-sub _stopwords {
-  my ($lang) = @_;
-
-  my $stopwords = getStopWords($lang, 'UTF-8');
-
-  return [keys %$stopwords];
-}
 
 true;
 
