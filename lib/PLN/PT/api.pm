@@ -11,11 +11,6 @@ use PLN::PT::api::tf;
 
 our $VERSION = '0.1';
 
-# env configuration
-my $TMPDIR = config->{'TMPDIR'};
-my $FL4BIN = config->{'FL4BIN'};
-my $FL4CFG = config->{'FL4CFG'};
-
 # home
 get '/' => sub { return 'PLN::PT::api -- http://pln.pt'; };
 
