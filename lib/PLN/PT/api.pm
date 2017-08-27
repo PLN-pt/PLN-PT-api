@@ -11,6 +11,7 @@ use PLN::PT::api::utils;
 use PLN::PT::api::tokenizer;
 use PLN::PT::api::tagger;
 use PLN::PT::api::dep_parser;
+use PLN::PT::api::morph_analyzer;
 
 our $VERSION = '0.1';
 
@@ -23,60 +24,17 @@ get '/' => sub {
   return 'PLN::PT::api -- http://pln.pt';
 };
 
-# get /morph
-get '/morph/*' => sub {
-  my ($word) = splat;
-  my $options = PLN::PT::api::utils::handle_opts();
-
-  my $i = File::Temp->new( DIR => $TMPDIR );
-  my $o = File::Temp->new( DIR => $TMPDIR );
-  my ($input, $output) = ($i->filename, $o->filename);
-
-  path($input)->spew_utf8($word);
-  my ($raw, $json) = _morph($input, $output, $options);
-
-  my $ct = 'application/json';
-  $ct = 'plain/text' if ($options->{output} eq 'raw');
-
-  content_type "$ct; charset='utf8'";
-  if ($options->{output} eq 'raw') {
-    return $raw;
-  }
-  else {
-    return $json;
-  }
-};
-
 # POST /tokenizer
 post '/tokenizer' => \&PLN::PT::api::tokenizer::route;
 
 # POST /tagger
 post '/tagger' => \&PLN::PT::api::tagger::route;
 
+# GET /morph_analyzer
+get '/morph_analyzer/*' => \&PLN::PT::api::morph_analyzer::route;
+
 # POST /tagger
 post '/dep_paser' => \&PLN::PT::api::dep_paser::route;
-
-# POST /word_analysis
-post '/word_analysis' => sub {
-  my $text = request->body;
-  my $options = PLN::PT::api::utils::handle_opts();;
-  my $r;
-
-  my $dict = Lingua::Jspell->new('pt');
-  $r = [$dict->fea($text)];
-
-  # raw
-  if ($options->{output} eq 'raw') {
-   content_type "text/plain; charset='utf8'";
-   return Dumper($r);
-  }
-
-  # json
-  if ($options->{output} eq 'json') {
-    content_type "application/json; charset='utf8'";
-    return encode_json($r);
-  }
-};
 
 post '/actants' => sub {
   my $text = request->body;
@@ -155,29 +113,6 @@ get '/stopwords' => sub {
   content_type "application/json; charset='utf8'";
   return to_json(_stopwords('PT'));
 };
-
-sub _morph {
-  my ($input, $output, $options) = @_;
-  my ($raw, $json);
-
-  my $command = PLN::PT::api::utils::fl4_command($options->{lang});
-  my $r = `$command --outlv morfo < $input > $output`;
-
-  # raw output
-  $raw = path($output)->slurp_raw;
-  $raw =~ s/^\s*\n//mg;
-
-  # json output
-  my ($word,@data) = split /\s/, $raw;
-  my @analysis = ();
-  while (@data) {
-    push @analysis, { lemma => $data[0], analysis => $data[1], prob => $data[2] };
-    @data = @data[3..$#data];
-  }
-  $json = PLN::PT::api::utils::my_encode([ $word, @analysis]);
-
-  return ($raw, $json);
-}
 
 sub _stopwords {
   my ($lang) = @_;

@@ -27,9 +27,10 @@ sub handle_opts {
       sentence  => 0,
       stopwords => 0,
       term      => 'form',
+      backend   => 'fl4',
     };
 
-  for my $p (qw.lang output use ner rtk sentence stopwords term.) {
+  for my $p (qw.lang output use ner rtk sentence stopwords term backend.) {
     if (param $p) {
       $options->{$p} = lc(param $p);
     }
