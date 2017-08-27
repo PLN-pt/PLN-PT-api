@@ -15,8 +15,8 @@ sub route {
   my $text = request->body;
   my $options = PLN::PT::api::utils::handle_opts();
 
-  my $i = File::Temp->new( DIR => $TMPDIR );
-  my $o = File::Temp->new( DIR => $TMPDIR );
+  my $i = File::Temp->new( DIR => $TMPDIR, EXLOCK => 0 );
+  my $o = File::Temp->new( DIR => $TMPDIR, EXLOCK => 0 );
   my ($input, $output) = ($i->filename, $o->filename);
 
   path($input)->spew_raw($text);
