@@ -13,6 +13,7 @@ use PLN::PT::api::tagger;
 use PLN::PT::api::dep_parser;
 use PLN::PT::api::morph_analyzer;
 use PLN::PT::api::stopwords;
+use PLN::PT::api::actants;
 
 our $VERSION = '0.1';
 
@@ -30,33 +31,7 @@ get  '/stopwords'        => \&PLN::PT::api::stopwords::route;
 post '/tokenizer'        => \&PLN::PT::api::tokenizer::route;
 post '/tagger'           => \&PLN::PT::api::tagger::route;
 post '/dep_paser'        => \&PLN::PT::api::dep_paser::route;
-
-post '/actants' => sub {
-  my $text = request->body;
-  my $options = PLN::PT::api::utils::handle_opts();
-  my $r;
-
-  my $t = _get_dep_tree($text);
-  my $o = Lingua::PT::Actants->new( conll => $t );
-  my @cores = $o->acts_cores;
-  my @syns = $o->acts_syns(@cores);
-
-  # raw
-  my $raw = $o->pp_acts_syntagmas(@syns) . $o->pp_acts_cores(@cores);
-
-  # json
-  my $data = { syntagmas => [@syns], cores => [@cores] };
-  my $json = PLN::PT::api::utils::my_encode($data);
-
-  if ($options->{output} eq 'raw') {
-    content_type "text/plain; charset='utf8'";
-    return $raw;
-  }
-  if ($options->{output} eq 'json') {
-    content_type "application/json; charset='utf8'";
-    return $json;
-  }
-};
+post '/actants'          => \&PLN::PT::api::actants::route;
 
 # POST /tf
 post '/tf' => sub {
