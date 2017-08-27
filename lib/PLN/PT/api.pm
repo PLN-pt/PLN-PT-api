@@ -1,12 +1,5 @@
 package PLN::PT::api;
 use Dancer2;
-use File::Temp;
-use Path::Tiny;
-use Lingua::Jspell;
-use Lingua::PT::Actants;
-use Lingua::PT::PLNbase;
-use Lingua::StopWords qw/getStopWords/;
-
 use PLN::PT::api::utils;
 use PLN::PT::api::tokenizer;
 use PLN::PT::api::tagger;
