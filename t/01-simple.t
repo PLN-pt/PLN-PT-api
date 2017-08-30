@@ -8,9 +8,9 @@ use PLN::PT::api;
 
 my $test = Plack::Test->create( PLN::PT::api->to_app );
 
+
 my $r = $test->request( GET '/' );
-ok( $r->is_success, 'GET / - successful request' );
-is( $r->content, 'PLN::PT::api -- http://pln.pt', 'GET / - correct content' );
+is $r->header('Location') => "http://pln.pt";
 
 $r = $test->request( POST '/tokenizer', Content => 'A Maria tem razão.' );
 my $data = _my_decode($r->content);
