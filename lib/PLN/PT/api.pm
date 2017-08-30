@@ -11,6 +11,11 @@ use PLN::PT::api::tf;
 
 our $VERSION = '0.1';
 
+BEGIN {
+  mkdir config->{TMPDIR} unless -d config->{TMPDIR};
+};
+
+
 # home
 get '/' => sub { redirect "http://pln.pt" };
 
