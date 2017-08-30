@@ -12,7 +12,7 @@ use PLN::PT::api::tf;
 our $VERSION = '0.1';
 
 # home
-get '/' => sub { return 'PLN::PT::api -- http://pln.pt'; };
+get '/' => sub { redirect "http://pln.pt" };
 
 # routes
 get  '/morph_analyzer/*' => \&PLN::PT::api::morph_analyzer::route;
