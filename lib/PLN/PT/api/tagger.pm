@@ -39,9 +39,11 @@ sub tagger {
   my ($input, $output, $options) = @_;
   my ($raw, $json);
 
-  my $opts;
-  $opts  = $options->{ner} ?  ' --ner' : ' --noner';
-  $opts .= $options->{rtk} ?  ' --rtk' : ' --nortk';
+  my @opts;
+  push @opts, $options->{ner} ?  '--ner' : '--noner';
+  push @opts, $options->{rtk} ?  '--rtk' : '--nortk';
+  push @opts, "-s $options->{sense}";
+  my $opts = join(" ", @opts);
 
   my $command = PLN::PT::api::utils::fl4_command($options->{lang});
   my $r = `$command --outlv tagged $opts < $input > $output`;
