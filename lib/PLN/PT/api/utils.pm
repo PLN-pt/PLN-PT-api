@@ -17,6 +17,9 @@ sub fl4_command {
 }
 
 sub handle_opts {
+  my $validators = {
+      sense => sub { $_[0] =~ /^(?:no|none|all|mfs|ukb)$/ },
+  };
   # set defaults
   my $options = {
       lang      => 'pt',
@@ -28,11 +31,13 @@ sub handle_opts {
       stopwords => 0,
       term      => 'form',
       backend   => 'fl4',
+      sense     => 'no',
     };
 
-  for my $p (qw.lang output use ner rtk sentence stopwords term backend.) {
+  for my $p (keys %$options) {
     if (param $p) {
-      $options->{$p} = lc(param $p);
+      my $param = lc(param $p);
+      $options->{$p} = $param if !exists($validator->{$p}) || $validator->{$p}($param);
     }
   }
 
