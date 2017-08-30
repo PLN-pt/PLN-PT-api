@@ -17,7 +17,7 @@ sub fl4_command {
 }
 
 sub handle_opts {
-  my $validators = {
+  my $validator = {
       sense => sub { $_[0] =~ /^(?:no|none|all|mfs|ukb)$/ },
   };
   # set defaults
