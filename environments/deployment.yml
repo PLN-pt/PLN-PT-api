@@ -28,3 +28,7 @@ FL4CFG:
   PT: '/opt/freeling-4.0/share/freeling/config/pt.cfg'
   GL: '/opt/freeling-4.0/share/freeling/config/gl.cfg'
 
+SYNTAXNET:
+  WRAPPER: 'bin/syntaxnet_wrapper'
+  BACKEND: 'http://127.0.0.1:7000/v1/parsey-universal-full'
+
