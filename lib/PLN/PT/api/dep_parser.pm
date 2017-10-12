@@ -30,7 +30,7 @@ sub route {
   }
   if ($options->{output} eq 'json') {
     content_type "application/json; charset='utf8'";
-    return encode_json([@final]);
+    return PLN::PT::api::utils::my_encode([@final]);
   }
 }
 
@@ -38,7 +38,7 @@ sub _get_dep_tree {
   my ($text) = @_;
   my $r;
 
-  my $i = File::Temp->new( DIR => $TMPDIR, UNLINK => 0 );
+  my $i = File::Temp->new( DIR => $TMPDIR, UNLINK => 1 );
   my $input = $i->filename;
   path($input)->spew_raw($text);
 
