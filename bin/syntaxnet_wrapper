@@ -1,0 +1,4 @@
+#!/bin/sh
+
+curl -s -X POST --header 'Content-Type: text/plain; charset=utf-8' --header 'Accept: text/plain' --header 'Content-Language: pt' -d @$2 $1
+

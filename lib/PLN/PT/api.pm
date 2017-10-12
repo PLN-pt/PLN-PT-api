@@ -15,7 +15,6 @@ BEGIN {
   mkdir config->{TMPDIR} unless -d config->{TMPDIR};
 };
 
-
 # home
 get '/' => sub { redirect "http://pln.pt" };
 
@@ -24,7 +23,7 @@ get  '/morph_analyzer/*' => \&PLN::PT::api::morph_analyzer::route;
 get  '/stopwords'        => \&PLN::PT::api::stopwords::route;
 post '/tokenizer'        => \&PLN::PT::api::tokenizer::route;
 post '/tagger'           => \&PLN::PT::api::tagger::route;
-post '/dep_paser'        => \&PLN::PT::api::dep_paser::route;
+post '/dep_parser'       => \&PLN::PT::api::dep_parser::route;
 post '/actants'          => \&PLN::PT::api::actants::route;
 post '/tf'               => \&PLN::PT::api::tf::route;
 
