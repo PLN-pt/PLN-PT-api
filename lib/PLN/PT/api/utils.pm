@@ -58,4 +58,12 @@ sub my_decode {
   return $o->decode($data);
 }
 
+sub get_body {
+  my $body = request->body;
+
+  $body =~ s/([\.\!\?]+)/ $1 /g;
+
+  return $body;
+}
+
 true;

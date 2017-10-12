@@ -4,6 +4,7 @@ use File::Temp;
 use Path::Tiny;
 
 use PLN::PT::api::utils;
+use Lingua::Sentence;
 
 # env configuration
 my $TMPDIR = config->{'TMPDIR'};
@@ -12,7 +13,7 @@ my $FL4CFG = config->{'FL4CFG'};
 
 # POST /tokenizer
 sub route {
-  my $text = request->body;
+  my $text = PLN::PT::api::utils::get_body;
   my $options = PLN::PT::api::utils::handle_opts();
 
   my $i = File::Temp->new( DIR => $TMPDIR, EXLOCK => 0 );
@@ -43,8 +44,8 @@ sub tokenizer {
 
   my $r;
   if ($options->{sentence}) {
-    my @sentences = frases(path($input)->slurp_raw);
-    path($output)->spew_raw(join("\n\n", @sentences));
+    my $splitter = Lingua::Sentence->new($options->{'lang'});
+    path($output)->spew_raw($splitter->split(path($input)->slurp_raw));
   }
   else {
     my $command = PLN::PT::api::utils::fl4_command($options->{lang});
