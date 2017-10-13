@@ -13,7 +13,7 @@ my $FL4CFG = config->{'FL4CFG'};
 
 # POST /tokenizer
 sub route {
-  my $text = PLN::PT::api::utils::get_body;
+  my $text = request->body;
   my $options = PLN::PT::api::utils::handle_opts();
 
   my $i = File::Temp->new( DIR => $TMPDIR, EXLOCK => 0 );
