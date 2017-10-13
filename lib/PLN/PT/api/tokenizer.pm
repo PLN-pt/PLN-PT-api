@@ -55,8 +55,9 @@ sub tokenizer {
           next;
         }
         else {
-          push @final, [reverse(@curr),$_->[0]];
-          @curr = ();
+          push @final, [reverse(@curr)];
+          @curr = ($_->[0]);
+          next;
         }
       }
       push @curr, $_->[0];
