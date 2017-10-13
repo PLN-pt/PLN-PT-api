@@ -4,7 +4,7 @@ use File::Temp;
 use Path::Tiny;
 
 use PLN::PT::api::utils;
-use Lingua::Sentence;
+use PLN::PT::api::tagger;
 
 # env configuration
 my $TMPDIR = config->{'TMPDIR'};
@@ -39,33 +39,51 @@ sub tokenizer {
   my ($input, $output, $options) = @_;
   my ($raw, $json);
 
-  my $outlv = 'token';
-  $outlv = 'splitted' if ($options->{sentence}); # sentece split
-
-  my $r;
   if ($options->{sentence}) {
-    my $splitter = Lingua::Sentence->new($options->{'lang'});
-    path($output)->spew_raw($splitter->split(path($input)->slurp_raw));
+    my ($raw, $json) = PLN::PT::api::tagger::tagger($input, $output, $options);
+    my $data = PLN::PT::api::utils::my_decode($json);
+
+    # hand split sentences
+    my @final;
+    my @curr = ();
+    my $ignore_first = 1;
+    for (reverse(@$data)) {
+      if ($_->[2] =~ m/^(Fp|Fat|Fit)$/) {
+        if ($ignore_first) {
+          $ignore_first = 0;
+          push @curr, $_->[0];
+          next;
+        }
+        else {
+          push @final, [reverse(@curr),$_->[0]];
+          @curr = ();
+        }
+      }
+      push @curr, $_->[0];
+    }
+    push @final, [reverse(@curr)] if scalar(@curr) > 0;
+    for (@final) {
+      $_ = join(' ', @$_);
+    }
+    @final = reverse(@final);
+
+    $raw = join("\n", @final);
+    $json = PLN::PT::api::utils::my_encode([@final]);
+
+    return ($raw, $json);
   }
-  else {
-    my $command = PLN::PT::api::utils::fl4_command($options->{lang});
-    $r = `$command --outlv $outlv < $input > $output`;
-    print "$command --outlv $outlv < $input > $output\n";
-  }
+
+  my $outlv = 'token';
+
+  my $command = PLN::PT::api::utils::fl4_command($options->{lang});
+  my $r = `$command --outlv $outlv < $input > $output`;
 
   # raw output
   $raw = path($output)->slurp_raw;
   $raw =~ s/^\s*\n//mg unless ($options->{sentence});
 
   # json output
-  my @data;
-  if ($options->{sentence}) {
-    #@data = split /\n/, $raw;
-    @data = split /\n\n*/m, $raw;
-  }
-  else {
-    @data = split /\n/, $raw;
-  }
+  my @data = split /\n/, $raw;
   @data = grep {!/^$/} @data;
   $json = PLN::PT::api::utils::my_encode([@data]);
 
