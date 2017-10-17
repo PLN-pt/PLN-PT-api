@@ -49,19 +49,19 @@ sub tokenizer {
     my @curr = ();
     my $ignore_first = 1;
     for (reverse(@$data)) {
-      if ($_->[2] =~ m/^(Fp|Fat|Fit)$/) {
+      if ($_->{pos} =~ m/^(Fp|Fat|Fit)$/) {
         if ($ignore_first) {
           $ignore_first = 0;
-          push @curr, $_->[0];
+          push @curr, $_->{form};
           next;
         }
         else {
           push @final, [reverse(@curr)];
-          @curr = ($_->[0]);
+          @curr = ($_->{form});
           next;
         }
       }
-      push @curr, $_->[0];
+      push @curr, $_->{form};
     }
     push @final, [reverse(@curr)] if scalar(@curr) > 0;
     for (@final) {

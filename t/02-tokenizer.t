@@ -23,5 +23,11 @@ ok( $data->[2] eq 'tem',   '3rd token in "tem"' );
 ok( $data->[3] eq 'razão', '4th token in "razão"' );
 ok( $data->[4] eq '.',     '5th token in "."' );
 
+$r = $test->request( POST '/tokenizer?sentence=1',
+  Content => Encode::encode_utf8('A Maria tem razão. A Maria tem razão.') );
+$data = decode_json($r->content);
+
+ok( scalar(@$data) == 2, 'content has 2 sentences' );
+
 done_testing();
 
