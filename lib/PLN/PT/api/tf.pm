@@ -5,6 +5,7 @@ use Path::Tiny;
 
 use PLN::PT::api::utils;
 use PLN::PT::api::tagger;
+use utf8::all;
 
 # env configuration
 my $TMPDIR = config->{'TMPDIR'};

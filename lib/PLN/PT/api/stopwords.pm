@@ -3,6 +3,7 @@ use Dancer2 appname => 'PLN::PT::api';
 use Lingua::StopWords qw/getStopWords/;
 
 use PLN::PT::api::utils;
+use utf8::all;
 
 sub route {
   content_type "application/json; charset='utf8'";

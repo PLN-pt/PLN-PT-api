@@ -1,8 +1,6 @@
 package PLN::PT::api::utils;
 use Dancer2 appname => 'PLN::PT::api';
 
-use JSON::MaybeXS;
-
 # env configuration
 my $FL4BIN = config->{'FL4BIN'};
 my $FL4CFG = config->{'FL4CFG'};
@@ -47,15 +45,13 @@ sub handle_opts {
 sub my_encode {
   my ($data) = @_;
 
-  my $o = JSON::MaybeXS->new(utf8 => 0);
-  return $o->encode($data);
+  return to_json($data);
 }
 
 sub my_decode {
   my ($data) = @_;
 
-  my $o = JSON::MaybeXS->new(utf8 => 0);
-  return $o->decode($data);
+  return from_json($data);
 }
 
 true;

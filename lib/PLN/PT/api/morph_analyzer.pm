@@ -5,6 +5,7 @@ use Path::Tiny;
 use Lingua::Jspell;
 
 use PLN::PT::api::utils;
+use utf8::all;
 
 our $VERSION = '0.1';
 
@@ -66,7 +67,7 @@ sub morph_analyzer {
   if ($options->{backend} eq 'jspell') {
     my $dict = Lingua::Jspell->new('pt');
 
-    my $r = [$dict->fea(path($input)->slurp_raw)];
+    my $r = [$dict->fea(path($input)->slurp)];
     $json = PLN::PT::api::utils::my_encode($r);
     return ('', $json);
   }
@@ -76,7 +77,7 @@ sub morph_analyzer {
     my $r = `$command --outlv morfo < $input > $output`;
 
     # raw output
-    $raw = path($output)->slurp_raw;
+    $raw = path($output)->slurp;
     $raw =~ s/^\s*\n//mg;
 
     # json output

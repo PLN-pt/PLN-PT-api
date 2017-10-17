@@ -4,6 +4,7 @@ use File::Temp;
 use Path::Tiny;
 
 use PLN::PT::api::utils;
+use utf8::all;
 
 # env configuration
 my $TMPDIR = config->{'TMPDIR'};
@@ -49,7 +50,7 @@ sub tagger {
   my $r = `$command --outlv tagged $opts < $input > $output`;
 
   # raw output
-  $raw = path($output)->slurp_raw;
+  $raw = path($output)->slurp;
   $raw =~ s/^\s*\n//mg;
 
   # json output

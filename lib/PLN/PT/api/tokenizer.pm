@@ -5,6 +5,7 @@ use Path::Tiny;
 
 use PLN::PT::api::utils;
 use PLN::PT::api::tagger;
+use utf8::all;
 
 # env configuration
 my $TMPDIR = config->{'TMPDIR'};
@@ -80,7 +81,7 @@ sub tokenizer {
   my $r = `$command --outlv $outlv < $input > $output`;
 
   # raw output
-  $raw = path($output)->slurp_raw;
+  $raw = path($output)->slurp;
   $raw =~ s/^\s*\n//mg unless ($options->{sentence});
 
   # json output
