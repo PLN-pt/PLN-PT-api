@@ -18,9 +18,21 @@ sub route {
 
   my $raw = _get_dep_tree($text);
 
-  my @final;
+  my @analysis;
   for my $line (split /\n+/, $raw) {
-    push @final, [split /\s+/, $line];
+    my @l = split /\s+/, $line;
+    push @analysis, {
+        id      => $l[0],
+        form    => $l[1],
+        lemma   => $l[2],
+        upostag => $l[3],
+        xpostag => $l[4],
+        feats   => $l[5],
+        head    => $l[6],
+        deprel  => $l[7],
+        deps    => $l[8],
+        misc    => $l[9],
+      };
   }
 
   if ($options->{output} eq 'raw') {
@@ -29,7 +41,7 @@ sub route {
   }
   if ($options->{output} eq 'json') {
     content_type "application/json; charset='utf8'";
-    return PLN::PT::api::utils::my_encode([@final]);
+    return PLN::PT::api::utils::my_encode([@analysis]);
   }
 }
 

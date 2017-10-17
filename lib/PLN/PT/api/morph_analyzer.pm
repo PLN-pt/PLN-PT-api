@@ -85,9 +85,9 @@ sub morph_analyzer {
     my @analysis = ();
     while (@data) {
       push @analysis, {
-          lemma    => $data[0],
-          analysis => $data[1],
-          prob     => $data[2]
+          lemma => $data[0],
+          pos   => $data[1],
+          prob  => $data[2]
         };
       @data = @data[3..$#data];
     }

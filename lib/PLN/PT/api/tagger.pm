@@ -55,9 +55,17 @@ sub tagger {
 
   # json output
   my @data = split /\n/, $raw;
-  @data = grep {!/^$/} @data;
-  @data = map {[split /\s+/]} @data;
-  $json = PLN::PT::api::utils::my_encode([@data]);
+  my @analysis = ();
+  foreach (@data) {
+    my @l = split /\s+/, $_;
+    push @analysis, {
+        form  => $l[0],
+        lemma => $l[1],
+        pos   => $l[2],
+        prob  => $l[3]
+      };
+  }
+  $json = PLN::PT::api::utils::my_encode([@analysis]);
 
   return ($raw, $json);
 }
