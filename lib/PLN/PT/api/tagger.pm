@@ -62,8 +62,9 @@ sub tagger {
         form  => $l[0],
         lemma => $l[1],
         pos   => $l[2],
-        prob  => $l[3]
-      };
+	prob  => $l[3],
+        $l[4] ? (senses => $l[4]) : ()
+    };
   }
   $json = PLN::PT::api::utils::my_encode([@analysis]);
 
