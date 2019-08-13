@@ -8,6 +8,7 @@ use PLN::PT::api::morph_analyzer;
 use PLN::PT::api::stopwords;
 use PLN::PT::api::actants;
 use PLN::PT::api::tf;
+use PLN::PT::api::qaptnet;
 
 our $VERSION = '0.1';
 
@@ -26,6 +27,7 @@ post '/tagger'           => \&PLN::PT::api::tagger::route;
 post '/dep_parser'       => \&PLN::PT::api::dep_parser::route;
 post '/actants'          => \&PLN::PT::api::actants::route;
 post '/tf'               => \&PLN::PT::api::tf::route;
+post '/qaptnet'          => \&PLN::PT::api::qaptnet::route;
 
 true;
 
